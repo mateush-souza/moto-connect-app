@@ -2,9 +2,10 @@
 import axios from 'axios';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://webapp-motoconnect-557884.azurewebsites.net/api';
+const API_VERSION = 'v1';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: `${API_BASE_URL}/${API_VERSION}`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -57,6 +58,7 @@ export interface Vehicle {
 
 export interface User {
   userID?: string;
+  name: string;
   email: string;
   password: string;
   type: number;
@@ -130,54 +132,65 @@ export const deleteMaintenanceHistory = (id: string) => api.delete(`/Histories/$
 
 export const loginUser = async (email: string, password: string): Promise<LoginResponse> => {
   try {
-    const response = await getUsers();
-    
-    if (response.status === 200 && Array.isArray(response.data)) {
-      const users = response.data;
-      const user = users.find(
-        (u: User) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-      );
-      
-      if (user) {
+    const response = await api.post('/Auth/login', {
+      email,
+      password
+    });
+
+    if (response.status === 200 && response.data?.token) {
+      // Decodificar o token JWT para obter informações do usuário
+      const tokenParts = response.data.token.split('.');
+      if (tokenParts.length === 3) {
+        const payload = JSON.parse(atob(tokenParts[1]));
+
         return {
           success: true,
           message: 'Login realizado com sucesso',
           user: {
-            userID: user.userID || '',
-            email: user.email,
-            type: user.type
+            userID: payload.sub || '',
+            name: payload.name || '',
+            email: payload.email || email,
+            type: parseInt(payload.userType || '0')
           },
-          token: `token-${user.userID}-${Date.now()}`
+          token: response.data.token
         };
       }
-      
+
       return {
-        success: false,
-        message: 'Email ou senha incorretos'
+        success: true,
+        message: 'Login realizado com sucesso',
+        token: response.data.token
       };
     }
-    
+
+    if (response.status === 401) {
+      return {
+        success: false,
+        message: response.data?.message || 'Email ou senha incorretos'
+      };
+    }
+
     return {
       success: false,
       message: 'Erro ao conectar com o servidor'
     };
   } catch (error: any) {
     console.error('Erro no login:', error);
-    
+
     if (error.response) {
       return {
         success: false,
-        message: error.response.data?.message || 'Erro de autenticação'
+        message: error.response.data?.message || 'Credenciais inválidas'
       };
     }
-    
+
     if (error.request) {
       return {
         success: false,
         message: 'Não foi possível conectar ao servidor. Verifique sua conexão.'
       };
     }
-    
+
     return {
       success: false,
       message: 'Erro inesperado ao fazer login'
@@ -187,9 +200,10 @@ export const loginUser = async (email: string, password: string): Promise<LoginR
 
 export const authenticateUser = loginUser;
 
-export const registerUser = async (userData: { email: string; password: string; type?: number }) => {
+export const registerUser = async (userData: { name: string; email: string; password: string; type?: number }) => {
   try {
     const userPayload: Partial<User> = {
+      name: userData.name,
       email: userData.email,
       password: userData.password,
       type: userData.type || 0

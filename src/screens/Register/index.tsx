@@ -76,8 +76,9 @@ export default function Register() {
 
     try {
       const { registerUser } = require('../../services/api');
-      
+
       const userData = {
+        name: fullName.trim(),
         email: email.toLowerCase().trim(),
         password: password,
         type: selectedRole === 'admin' ? 1 : 0
@@ -130,7 +131,6 @@ export default function Register() {
                   setErrors((prev) => ({ ...prev, fullName: null }));
                 }
               }}
-              error={errors.fullName}
             />
             {errors.fullName && (
               <Text className="text-red-500 text-xs mt-1 ml-2">
@@ -149,7 +149,6 @@ export default function Register() {
               }}
               keyboardType="email-address"
               autoCapitalize="none"
-              error={errors.email}
             />
             {errors.email && (
               <Text className="text-red-500 text-xs mt-1 ml-2">
@@ -167,7 +166,6 @@ export default function Register() {
                 }
               }}
               secureTextEntry
-              error={errors.password}
             />
             {errors.password && (
               <Text className="text-red-500 text-xs mt-1 ml-2">
@@ -185,7 +183,6 @@ export default function Register() {
                 }
               }}
               secureTextEntry
-              error={errors.confirmPassword}
             />
             {errors.confirmPassword && (
               <Text className="text-red-500 text-xs mt-1 ml-2">
