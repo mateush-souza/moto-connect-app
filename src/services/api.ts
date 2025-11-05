@@ -74,6 +74,7 @@ export interface LoginResponse {
   message?: string;
   user?: {
     userID: string;
+    name?: string;
     email: string;
     type: number;
   };
@@ -226,4 +227,3 @@ export const registerUser = async (userData: { name: string; email: string; pass
 };
 
 export default api;
-

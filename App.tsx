@@ -1,6 +1,7 @@
 import "./global.css";
+import "./src/locales/i18n";
 import React from 'react';
-import { View } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 
 import { useFonts } from "expo-font";
 import {
@@ -16,11 +17,35 @@ import {
   RedHatDisplay_600SemiBold,
   RedHatDisplay_700Bold
 } from "@expo-google-fonts/red-hat-display";
-import { ActivityIndicator } from "react-native";
+
 import Routes from "./src/routes";
+import { ThemeProvider } from "./src/contexts/ThemeContext";
+import { NotificationProvider } from "./src/contexts/NotificationContext";
+import { LanguageProvider, useLanguage } from "./src/contexts/LanguageContext";
+import { useTheme } from "./src/contexts/ThemeContext";
+
+function LoadingScreen() {
+  const { isDark } = useTheme();
+
+  return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: isDark ? "#0f172a" : "#040404" }} >
+      <ActivityIndicator size="large" color={isDark ? "#60a5fa" : "#ED145B"} />
+    </View>
+  );
+}
+
+function AppContent() {
+  const { isLoading } = useLanguage();
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  return <Routes />;
+}
 
 export default function App() {
-  const [isFontLoaded, isFontError] = useFonts({
+  const [isFontLoaded] = useFonts({
     primary_regular: Inter_400Regular,
     primary_medium: Inter_500Medium,
     primary_semiBold: Inter_600SemiBold,
@@ -36,11 +61,16 @@ export default function App() {
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#040404" }} >
         <ActivityIndicator size="large" color="#ED145B" />
       </View>
-    )
+    );
   }
 
   return (
-    <Routes />
+    <LanguageProvider>
+      <ThemeProvider>
+        <NotificationProvider>
+          <AppContent />
+        </NotificationProvider>
+      </ThemeProvider>
+    </LanguageProvider>
   );
 }
-

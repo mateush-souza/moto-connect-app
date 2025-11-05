@@ -1,31 +1,37 @@
-// src/screens/CadastroErroScreen/index.tsx
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
-import { RootStackParamList } from '../../routes';
+import { useTranslation } from 'react-i18next';
 
-type ErroScreenRouteProp = RouteProp<RootStackParamList, 'ErrorScreen'>;
+import { RootStackParamList } from '../../routes';
+import { useTheme } from '../../contexts/ThemeContext';
+
+type ErrorScreenRouteProp = RouteProp<RootStackParamList, 'ErrorScreen'>;
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export function ErrorScreen() {
-  const navigation = useNavigation<import('@react-navigation/native-stack').NativeStackNavigationProp<RootStackParamList>>();
-  const route = useRoute<ErroScreenRouteProp>();
-  const motoData  = route.params || {};
+  const navigation = useNavigation<NavigationProp>();
+  const route = useRoute<ErrorScreenRouteProp>();
+  const motoData = route.params || {};
+  const { t } = useTranslation();
+  const { isDark } = useTheme();
 
-  const handleTentarNovamente = () => {
+  const handleTryAgain = () => {
     navigation.navigate('RFIDScreen', { motoData });
   };
 
-  const handleVoltarCadastro = () => {
+  const handleBackToForm = () => {
     navigation.navigate('MotorcycleRegistration');
   };
 
   return (
-    <View className="flex-1 bg-blue-600">
+    <View className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-blue-600'}`}>
       <StatusBar style="light" />
-      
-      {/* Header */}
+
       <View className="pt-12 pb-4 px-6">
         <TouchableOpacity
           onPress={() => navigation.navigate('Home')}
@@ -33,48 +39,44 @@ export function ErrorScreen() {
         >
           <Ionicons name="arrow-back" size={24} color="white" />
           <Text className="text-white text-lg font-semibold ml-2">
-            Voltar
+            {t('common.back')}
           </Text>
         </TouchableOpacity>
-        
+
         <Text className="text-white text-2xl font-bold">
-          Cadastro de motos
+          {t('motorcycleRegistration.title')}
         </Text>
       </View>
 
-      {/* Conteúdo Principal */}
       <View className="flex-1 justify-center items-center px-6">
-        {/* Ícone de Erro */}
         <View className="bg-red-500 rounded-full p-8 mb-8">
           <Ionicons name="close" size={64} color="white" />
         </View>
 
-        {/* Texto Principal */}
         <Text className="text-white text-2xl font-bold text-center mb-4">
-          Ops... Algo deu errado
-        </Text>
-        
-        <Text className="text-white text-base text-center opacity-90 mb-8 max-w-xs">
-          Certifique-se de que não há nenhum problema com o cadastro ainda e tente novamente!
+          {t('error.title')}
         </Text>
 
-        {/* Botões */}
-        <View className="w-full max-w-xs space-y-4">
+        <Text className="text-white text-base text-center opacity-90 mb-8 max-w-xs">
+          {t('error.message')}
+        </Text>
+
+        <View className="w-full max-w-xs">
           <TouchableOpacity
-            onPress={handleTentarNovamente}
+            onPress={handleTryAgain}
             className="bg-white rounded-full px-6 py-4"
           >
             <Text className="text-blue-600 font-semibold text-center text-base">
-              Tentar Novamente
+              {t('error.tryAgain')}
             </Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
-            onPress={handleVoltarCadastro}
+            onPress={handleBackToForm}
             className="bg-white/20 rounded-full px-6 py-4 mt-3"
           >
             <Text className="text-white font-semibold text-center text-base">
-              Voltar ao Cadastro
+              {t('error.backToRegister')}
             </Text>
           </TouchableOpacity>
         </View>

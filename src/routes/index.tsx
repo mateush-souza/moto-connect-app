@@ -1,5 +1,5 @@
 
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import Login from "../screens/Login";
@@ -10,6 +10,9 @@ import RFIDScreen from "../screens/RFIDScreen";
 import { SuccessScreen } from "../screens/SuccessScreen";
 import { ErrorScreen } from "../screens/ErrorScreen";
 import MotorcycleList from "../screens/MotorcycleList";
+import Settings from "../screens/Settings";
+import About from "../screens/About";
+import { useTheme } from "../contexts/ThemeContext";
 
 
 export type RootStackParamList = {
@@ -21,14 +24,19 @@ export type RootStackParamList = {
   RFIDScreen: { motoData: any };
   SuccessScreen: { motoData: any };
   ErrorScreen: { motoData: any};
+  Settings: undefined;
+  About: undefined;
 };
 
 
 const { Navigator, Screen } = createNativeStackNavigator();
 
 export default function Routes() {
+  const { theme } = useTheme();
+  const navigationTheme = theme === 'dark' ? DarkTheme : DefaultTheme;
+
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navigationTheme}>
       <Navigator
         id={undefined}
         screenOptions={{
@@ -43,6 +51,8 @@ export default function Routes() {
         <Screen name="RFIDScreen" component={RFIDScreen} />
         <Screen name="SuccessScreen" component={SuccessScreen} />
         <Screen name="ErrorScreen" component={ErrorScreen} />
+        <Screen name="Settings" component={Settings} />
+        <Screen name="About" component={About} />
       </Navigator>
     </NavigationContainer>
   )

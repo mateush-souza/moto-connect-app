@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
-import { colorScheme } from "nativewind";
 import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -11,55 +11,59 @@ import {
   View,
   Alert,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import { BackgroundStripes } from "../../components/BackgroundStripes";
 import { CustomButton } from "../../components/CustomButton";
 import { CustomInput } from "../../components/CustomInput";
 import { Logo } from "../../components/Logo";
-import { Picker } from '@react-native-picker/picker';
+import { useTheme } from "../../contexts/ThemeContext";
+import { RootStackParamList } from "../../routes";
 
-colorScheme.set("light");
-
-interface Errors {
-  fullName?: string | null;
-  email?: string | null;
-  password?: string | null;
-  confirmPassword?: string | null;
+interface RegisterErrors {
+  fullName?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
 }
 
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
 export default function Register() {
+  const { t } = useTranslation();
+  const { isDark } = useTheme();
+  const navigation = useNavigation<NavigationProp>();
+
   const [fullName, setFullName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [selectedRole, setSelectedRole] = useState<string>("user");
-  const [errors, setErrors] = useState<Errors>({});
+  const [errors, setErrors] = useState<RegisterErrors>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { navigate } = useNavigation();
 
   function validateFields(): boolean {
-    const newErrors: Errors = {};
+    const newErrors: RegisterErrors = {};
 
     if (!fullName.trim()) {
-      newErrors.fullName = "Nome completo é obrigatório";
+      newErrors.fullName = t('register.fullNameRequired');
     }
 
     if (!email.trim()) {
-      newErrors.email = "Email é obrigatório";
+      newErrors.email = t('register.emailRequired');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "Email inválido";
+      newErrors.email = t('register.invalidEmail');
     }
 
     if (!password.trim()) {
-      newErrors.password = "Senha é obrigatória";
+      newErrors.password = t('register.passwordRequired');
     } else if (password.length < 6) {
-      newErrors.password = "Senha deve ter pelo menos 6 caracteres";
+      newErrors.password = t('register.passwordMinLength');
     }
 
     if (!confirmPassword.trim()) {
-      newErrors.confirmPassword = "Confirmação de senha é obrigatória";
+      newErrors.confirmPassword = t('register.confirmPasswordRequired');
     } else if (password !== confirmPassword) {
-      newErrors.confirmPassword = "As senhas não coincidem";
+      newErrors.confirmPassword = t('register.passwordMismatch');
     }
 
     setErrors(newErrors);
@@ -68,7 +72,7 @@ export default function Register() {
 
   async function handleRegister() {
     if (!validateFields()) {
-      Alert.alert("Erro", "Por favor, corrija os campos destacados");
+      Alert.alert(t('common.error'), t('register.fixErrors'));
       return;
     }
 
@@ -81,24 +85,24 @@ export default function Register() {
         name: fullName.trim(),
         email: email.toLowerCase().trim(),
         password: password,
-        type: selectedRole === 'admin' ? 1 : 0
+        type: 0
       };
 
       const result = await registerUser(userData);
 
       if (result.success) {
         Alert.alert(
-          "Sucesso",
-          "Usuário cadastrado com sucesso!",
-          [{ text: "OK", onPress: () => navigate("Login") }]
+          t('common.success'),
+          t('register.registerSuccess'),
+          [{ text: t('common.ok'), onPress: () => navigation.navigate("Login") }]
         );
       } else {
-        Alert.alert("Erro", "Falha ao realizar cadastro. Tente novamente.");
+        Alert.alert(t('common.error'), t('register.registerError'));
       }
     } catch (error: any) {
       console.log("Erro no registro:", error);
-      const errorMessage = error.message || "Falha ao realizar cadastro. Tente novamente.";
-      Alert.alert("Erro", errorMessage);
+      const errorMessage = error.message || t('register.registerError');
+      Alert.alert(t('common.error'), errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -106,10 +110,10 @@ export default function Register() {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-white"
+      className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-white'}`}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <StatusBar style="dark" />
+      <StatusBar style={isDark ? "light" : "dark"} />
 
       <BackgroundStripes />
 
@@ -123,12 +127,12 @@ export default function Register() {
 
           <View>
             <CustomInput
-              placeholder="Nome Completo"
+              placeholder={t('register.fullName')}
               value={fullName}
               onChangeText={(text) => {
                 setFullName(text);
                 if (errors.fullName) {
-                  setErrors((prev) => ({ ...prev, fullName: null }));
+                  setErrors((prev) => ({ ...prev, fullName: undefined }));
                 }
               }}
             />
@@ -139,12 +143,12 @@ export default function Register() {
             )}
 
             <CustomInput
-              placeholder="Email"
+              placeholder={t('register.email')}
               value={email}
               onChangeText={(text) => {
                 setEmail(text);
                 if (errors.email) {
-                  setErrors((prev) => ({ ...prev, email: null }));
+                  setErrors((prev) => ({ ...prev, email: undefined }));
                 }
               }}
               keyboardType="email-address"
@@ -157,12 +161,12 @@ export default function Register() {
             )}
 
             <CustomInput
-              placeholder="Senha"
+              placeholder={t('register.password')}
               value={password}
               onChangeText={(text) => {
                 setPassword(text);
                 if (errors.password) {
-                  setErrors((prev) => ({ ...prev, password: null }));
+                  setErrors((prev) => ({ ...prev, password: undefined }));
                 }
               }}
               secureTextEntry
@@ -174,12 +178,12 @@ export default function Register() {
             )}
 
             <CustomInput
-              placeholder="Confirmar Senha"
+              placeholder={t('register.confirmPassword')}
               value={confirmPassword}
               onChangeText={(text) => {
                 setConfirmPassword(text);
                 if (errors.confirmPassword) {
-                  setErrors((prev) => ({ ...prev, confirmPassword: null }));
+                  setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
                 }
               }}
               secureTextEntry
@@ -191,18 +195,18 @@ export default function Register() {
             )}
 
             <CustomButton
-              title={isLoading ? "Cadastrando..." : "Cadastrar"}
+              title={isLoading ? t('register.registering') : t('register.registerButton')}
               onPress={handleRegister}
               disabled={isLoading}
             />
 
             <View className="flex-row justify-center mt-4">
-              <Text className="text-gray-600 text-sm">
-                Já tem conta?{" "}
+              <Text className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-sm`}>
+                {t('register.hasAccount')}{" "}
               </Text>
-              <TouchableOpacity onPress={() => navigate("Login")}>
+              <TouchableOpacity onPress={() => navigation.navigate("Login") }>
                 <Text className="text-blue-600 text-sm font-semibold underline">
-                  Faça login
+                  {t('register.login')}
                 </Text>
               </TouchableOpacity>
             </View>
