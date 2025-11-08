@@ -1,4 +1,4 @@
-package com.anonymous.fiaplog
+package com.fiap.motoconnect
 
 import android.app.Application
 import android.content.res.Configuration

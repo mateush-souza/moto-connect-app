@@ -209,7 +209,15 @@ eas build --platform ios
 
 ### Firebase App Distribution
 
-O app está configurado para publicação no Firebase App Distribution. Siga os passos em `CONFIG.md` para configurar.
+O app está configurado para publicação no Firebase App Distribution. 
+
+**📖 Tutorial completo:** Veja o arquivo [`DEPLOY-FIREBASE.md`](./DEPLOY-FIREBASE.md) para instruções detalhadas passo a passo.
+
+**Resumo rápido:**
+1. Build Android: `eas build --platform android --profile preview`
+2. Baixar o APK gerado
+3. Fazer upload no Firebase App Distribution
+4. Adicionar e-mail do professor como tester
 
 ## 🎥 Vídeo de Demonstração
 

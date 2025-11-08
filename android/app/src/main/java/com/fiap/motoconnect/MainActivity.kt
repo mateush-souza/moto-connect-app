@@ -1,4 +1,4 @@
-package com.anonymous.fiaplog
+package com.fiap.motoconnect
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

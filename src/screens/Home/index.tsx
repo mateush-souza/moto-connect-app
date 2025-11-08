@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { Menu } from '../../components/Menu';
 import { RootStackParamList } from '../../routes';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const image = require("../../../assets/images/banner-home.jpg");
 
@@ -19,6 +20,7 @@ export default function Home() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const { t } = useTranslation();
   const { isDark } = useTheme();
+  const { currentLanguage, changeLanguage } = useLanguage();
   const [userName, setUserName] = useState<string | null>(null);
 
   useEffect(() => {
@@ -38,6 +40,13 @@ export default function Home() {
     ? t('home.greeting', { name: userName.split(' ')[0] })
     : t('home.greetingFallback');
 
+  async function handleLanguageToggle() {
+    const nextLanguage = currentLanguage.startsWith('pt') ? 'es' : 'pt-BR';
+    await changeLanguage(nextLanguage);
+  }
+
+  const languageToggleLabel = currentLanguage.startsWith('pt') ? 'ES' : 'PT';
+
   return (
     <View className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <StatusBar style="light" />
@@ -50,12 +59,22 @@ export default function Home() {
         >
           <View className="absolute inset-0 bg-black/40" />
 
-          <TouchableOpacity
-            className="absolute top-12 right-4 bg-white/20 rounded-full p-2"
-            onPress={() => navigation.navigate('Settings')}
-          >
-            <Ionicons name="settings-outline" size={24} color="white" />
-          </TouchableOpacity>
+          <View className="absolute top-12 right-4 flex-row">
+            <TouchableOpacity
+              className="bg-white/20 rounded-full px-3 py-2 mr-3"
+              onPress={handleLanguageToggle}
+            >
+              <Text className="text-white font-semibold">
+                {languageToggleLabel}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="bg-white/20 rounded-full p-2"
+              onPress={() => navigation.navigate('Settings')}
+            >
+              <Ionicons name="settings-outline" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
 
           <View className="p-6 pb-8">
             <Text className="text-white text-2xl font-bold mb-2">

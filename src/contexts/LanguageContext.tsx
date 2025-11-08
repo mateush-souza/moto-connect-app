@@ -16,21 +16,33 @@ interface LanguageProviderProps {
 
 export function LanguageProvider({ children }: LanguageProviderProps) {
   const { i18n } = useTranslation();
+  const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const handleLanguageChanged = (lang: string) => {
+      setCurrentLanguage(lang);
+    };
+
+    i18n.on('languageChanged', handleLanguageChanged);
     loadLanguagePreference();
-  }, []);
+
+    return () => {
+      i18n.off('languageChanged', handleLanguageChanged);
+    };
+  }, [i18n]);
 
   async function loadLanguagePreference() {
     try {
       const savedLanguage = await AsyncStorage.getItem('@language_preference');
       if (savedLanguage) {
         await i18n.changeLanguage(savedLanguage);
+        setCurrentLanguage(savedLanguage);
       }
     } catch (error) {
       console.log('Erro ao carregar idioma:', error);
     } finally {
+      setCurrentLanguage(i18n.language);
       setIsLoading(false);
     }
   }
@@ -39,6 +51,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     try {
       await AsyncStorage.setItem('@language_preference', lang);
       await i18n.changeLanguage(lang);
+      setCurrentLanguage(lang);
     } catch (error) {
       console.log('Erro ao mudar idioma:', error);
     }
@@ -47,7 +60,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   return (
     <LanguageContext.Provider
       value={{
-        currentLanguage: i18n.language,
+        currentLanguage,
         changeLanguage,
         isLoading,
       }}

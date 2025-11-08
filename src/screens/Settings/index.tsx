@@ -22,7 +22,7 @@ export default function Settings() {
   const { navigate } = useNavigation<NavigationProp>();
   const { themeMode, setThemeMode, isDark } = useTheme();
   const { notificationsEnabled, setNotificationsEnabled, sendLocalNotification } = useNotifications();
-  const { language, setLanguage } = useLanguage();
+  const { currentLanguage, changeLanguage } = useLanguage();
 
   const languages = useMemo(() => ([
     { code: 'es', name: 'Español' },
@@ -36,7 +36,7 @@ export default function Settings() {
   ]), [t]);
 
   async function handleLanguageChange(languageCode: string) {
-    await setLanguage(languageCode);
+    await changeLanguage(languageCode);
   }
 
   return (
@@ -55,7 +55,7 @@ export default function Settings() {
             {t('settings.language')}
           </Text>
           {languages.map((lang) => {
-            const isSelected = language === lang.code || i18n.language.startsWith(lang.code);
+            const isSelected = currentLanguage === lang.code || i18n.language.startsWith(lang.code);
             return (
               <TouchableOpacity
                 key={lang.code}

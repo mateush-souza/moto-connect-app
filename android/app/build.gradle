@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.anonymous.fiaplog'
+    namespace 'com.fiap.motoconnect'
     defaultConfig {
-        applicationId 'com.anonymous.fiaplog'
+        applicationId 'com.fiap.motoconnect'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
