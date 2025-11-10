@@ -1,8 +1,10 @@
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://webapp-motoconnect-557884.azurewebsites.net/api';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://webapp-motoconnect-555466.azurewebsites.net/api';
 const API_VERSION = 'v1';
+const AUTH_TOKEN_STORAGE_KEY = '@auth_token';
 
 const api = axios.create({
   baseURL: `${API_BASE_URL}/${API_VERSION}`,
@@ -13,9 +15,39 @@ const api = axios.create({
   validateStatus: (status) => status < 500,
 });
 
+const applyAuthorizationHeader = (token: string | null) => {
+  if (token) {
+    api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common.Authorization;
+  }
+};
+
+export const setAuthToken = async (token: string | null) => {
+  applyAuthorizationHeader(token);
+  if (token) {
+    await AsyncStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+  } else {
+    await AsyncStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+  }
+};
+
+const initializeAuthToken = async () => {
+  const storedToken = await AsyncStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+  applyAuthorizationHeader(storedToken);
+};
+
+initializeAuthToken().catch(() => undefined);
+
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
     console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    if (!config.headers?.Authorization) {
+      const storedToken = await AsyncStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+      if (storedToken) {
+        config.headers.Authorization = `Bearer ${storedToken}`;
+      }
+    }
     return config;
   },
   (error) => {
@@ -139,7 +171,7 @@ export const loginUser = async (email: string, password: string): Promise<LoginR
     });
 
     if (response.status === 200 && response.data?.token) {
-      // Decodificar o token JWT para obter informações do usuário
+      await setAuthToken(response.data.token);
       const tokenParts = response.data.token.split('.');
       if (tokenParts.length === 3) {
         const payload = JSON.parse(atob(tokenParts[1]));
@@ -165,6 +197,7 @@ export const loginUser = async (email: string, password: string): Promise<LoginR
     }
 
     if (response.status === 401) {
+      await setAuthToken(null);
       return {
         success: false,
         message: response.data?.message || 'Email ou senha incorretos'
@@ -177,6 +210,7 @@ export const loginUser = async (email: string, password: string): Promise<LoginR
     };
   } catch (error: any) {
     console.error('Erro no login:', error);
+    await setAuthToken(null);
 
     if (error.response) {
       return {

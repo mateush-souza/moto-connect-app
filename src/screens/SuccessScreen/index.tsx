@@ -68,14 +68,9 @@ export function SuccessScreen() {
               <Text className="text-white font-semibold text-lg">{motoData.plate || motoData.placa}</Text>
             </View>
 
-            <View className="flex-row justify-between items-center mb-3">
+            <View className="flex-row justify-between items-center">
               <Text className="text-white text-sm opacity-75">{t('success.model')}:</Text>
               <Text className="text-white font-semibold">{motoData.model || motoData.modelo}</Text>
-            </View>
-
-            <View className="flex-row justify-between items-center">
-              <Text className="text-white text-sm opacity-75">{t('success.date')}:</Text>
-              <Text className="text-white font-semibold">{motoData.date || motoData.dataEntrada}</Text>
             </View>
           </View>
         )}

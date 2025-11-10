@@ -16,7 +16,6 @@ import { RootStackParamList } from '../../routes';
 
 interface FormData {
   placa: string;
-  dataEntrada: string;
   modelo: string;
 }
 
@@ -30,7 +29,6 @@ export default function MotorcycleRegistration() {
 
   const [formData, setFormData] = useState<FormData>({
     placa: '',
-    dataEntrada: '',
     modelo: 'E'
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -62,37 +60,14 @@ export default function MotorcycleRegistration() {
     return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 7)}`;
   };
 
-  const formatData = (text: string) => {
-    const numbers = text.replace(/\D/g, '');
-
-    if (numbers.length <= 2) {
-      return numbers;
-    } else if (numbers.length <= 4) {
-      return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
-    } else if (numbers.length <= 8) {
-      return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}/${numbers.slice(4)}`;
-    }
-    return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}/${numbers.slice(4, 8)}`;
-  };
-
   const handlePlacaChange = (text: string) => {
     const formatted = formatPlaca(text);
     handleInputChange('placa', formatted);
   };
 
-  const handleDataChange = (text: string) => {
-    const formatted = formatData(text);
-    handleInputChange('dataEntrada', formatted);
-  };
-
   const validateForm = (): boolean => {
     if (!formData.placa || formData.placa.length < 7) {
       Alert.alert(t('common.error'), t('motorcycleRegistration.plateRequired'));
-      return false;
-    }
-
-    if (!formData.dataEntrada || formData.dataEntrada.length < 10) {
-      Alert.alert(t('common.error'), t('motorcycleRegistration.invalidDate'));
       return false;
     }
 
@@ -131,7 +106,6 @@ export default function MotorcycleRegistration() {
           motoData: {
             plate: formData.placa,
             model: formData.modelo,
-            date: formData.dataEntrada,
             id: response.data?.vehicleId,
           }
         });
@@ -188,18 +162,6 @@ export default function MotorcycleRegistration() {
             />
           </View>
 
-          <View className="mb-4">
-            <Text className={`${isDark ? 'text-gray-200' : 'text-gray-700'} font-medium mb-2`}>
-              {t('motorcycleRegistration.date')}
-            </Text>
-            <CustomInput
-              placeholder={t('motorcycleRegistration.datePlaceholder')}
-              value={formData.dataEntrada}
-              onChangeText={handleDataChange}
-              keyboardType="numeric"
-              autoCapitalize="none"
-            />
-          </View>
 
           <View className="mb-6">
             <Text className={`${isDark ? 'text-gray-200' : 'text-gray-700'} font-medium mb-2`}>
